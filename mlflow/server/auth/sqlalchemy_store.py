@@ -25,9 +25,28 @@ from mlflow.utils.validation import _validate_username
 
 class SqlAlchemyStore:
     def init_db(self, db_uri):
-        self.db_uri = db_uri
         self.db_type = extract_db_type_from_uri(db_uri)
-        self.engine = create_sqlalchemy_engine_with_retry(db_uri)
+        self.db_uri = db_uri
+        authorityHostUrl = "https://login.microsoftonline.com"
+        authority_url = authorityHostUrl + '/' + tenantID
+        resource = "https://database.windows.net/"
+        context = adal.AuthenticationContext(authority_url, api_version=None)
+        token = context.acquire_token_with_client_credentials(
+            resource,
+            clientID,
+            clientSecret)
+        tokenb = bytes(token["accessToken"], "UTF-8")
+        exptoken = b''
+        for i in tokenb:
+            exptoken += bytes({i})
+            exptoken += bytes(1)
+        tokenstruct = struct.pack("=i", len(exptoken)) + exptoken
+        ##TODO
+        host = 'autonomize-molina.public.4a1c6c84a273.database.windows.net'
+        db = 'master'
+        SAconnString = "mssql+pyodbc://<host>/<database>?driver=ODBC+Driver+17+for+SQL+Server"
+        params = urllib.parse.quote(SAconnString)
+        self.engine = create_sqlalchemy_engine_with_retry(SAconnString, connect_args={'attrs_before': {SQL_COPT_SS_ACCESS_TOKEN:tokenstruct}})
         dbutils.migrate_if_needed(self.engine, "head")
         SessionMaker = sessionmaker(bind=self.engine)
         self.ManagedSessionMaker = _get_managed_session_maker(SessionMaker, self.db_type)

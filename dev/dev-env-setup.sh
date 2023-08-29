@@ -37,7 +37,7 @@ This script will:
 
 -f,     --full        Whether to install all dev requirements (Default: false)
 
--q,     --quiet       Whether to have pip install in quiet mode (Default: false)
+-q,     --quiet       Whether to have pip3 install in quiet mode (Default: false)
 
 -o,     --override    Override the python version
 
@@ -191,8 +191,8 @@ echo "$(tput setaf 2) Installing Python version $(tput bold)$PY_INSTALL_VERSION$
 # Install the Python version if it cannot be found
 pyenv install -s "$PY_INSTALL_VERSION"
 pyenv local "$PY_INSTALL_VERSION"
-pyenv exec pip install $(quiet_command) --upgrade pip
-pyenv exec pip install $(quiet_command) virtualenv
+pyenv exec pip3 install $(quiet_command) --upgrade pip3
+pyenv exec pip3 install $(quiet_command) virtualenv
 
 VENV_DIR="$directory/bin/activate"
 
@@ -218,27 +218,27 @@ source "$VENV_DIR"
 echo "$(tput setaf 2)Current Python version: $(tput bold)$(python --version)$(tput sgr0)"
 echo "$(tput setaf 3)Activated environment is located: $(tput bold) $directory/bin/activate$(tput sgr0)"
 
-echo "Installing pip dependencies for development environment."
+echo "Installing pip3 dependencies for development environment."
 
 # Install current checked out version of MLflow (local)
-pip install $(quiet_command) -e .[extras]
+pip3 install $(quiet_command) -e .[extras]
 
 if [[ -n "$full" ]]; then
   # Install dev requirements and test plugin
-  pip install $(quiet_command) -r "$MLFLOW_HOME/requirements/dev-requirements.txt"
+  pip3 install $(quiet_command) -r "$MLFLOW_HOME/requirements/dev-requirements.txt"
   # Install test plugin
-  pip install $(quiet_command) -e "$MLFLOW_HOME/tests/resources//mlflow-test-plugin"
-  echo "Finished installing pip dependencies."
+  pip3 install $(quiet_command) -e "$MLFLOW_HOME/tests/resources//mlflow-test-plugin"
+  echo "Finished installing pip3 dependencies."
 else
   files=("$rd/test-requirements.txt" "$rd/lint-requirements.txt" "$rd/doc-requirements.txt")
   for r in "${files[@]}";
   do
-    pip install $(quiet_command) -r "$r"
+    pip3 install $(quiet_command) -r "$r"
   done
 fi
 
 echo "$(tput setaf 2; tput smul)Python packages that have been installed:$(tput rmul)"
-echo "$(pip freeze)$(tput sgr0)"
+echo "$(pip3 freeze)$(tput sgr0)"
 
 command -v docker >/dev/null 2>&1 || echo "$(tput bold; tput setaf 1)A docker installation cannot be found. Please ensure that docker is installed to run all tests locally.$(tput sgr0)"
 
